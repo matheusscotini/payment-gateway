@@ -1,0 +1,25 @@
+{
+  "name": "payment-gateway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "workspaces": ["apps/*", "libs/*"],
+  "scripts": {
+    "dev:api": "npm -w @pg/api run start:dev",
+    "dev:worker": "npm -w @pg/worker run dev",
+    "dev:receiver": "npm -w @pg/webhook-receiver run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheusscotini/payment-gateway.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/matheusscotini/payment-gateway/issues"
+  },
+  "homepage": "https://github.com/matheusscotini/payment-gateway#readme"
+}

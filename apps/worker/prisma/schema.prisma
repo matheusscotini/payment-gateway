@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Charge {
+  id                 String   @id @default(cuid())
+  merchantId         String
+  amount             Int
+  currency           String
+  status             ChargeStatus
+  customerName       String
+  customerEmail      String
+  paymentMethodType  String
+  paymentTokenLast4  String
+  webhookUrl         String
+  metadata           Json?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  events             Event[]
+  idempotencyKeys    IdempotencyKey[]
+  webhookDeliveries  WebhookDelivery[]
+}
+
+model IdempotencyKey {
+  id               String   @id @default(cuid())
+  merchantId       String
+  key              String
+  requestHash      String
+  responseSnapshot Json
+  chargeId         String
+
+  createdAt        DateTime @default(now())
+
+  charge           Charge   @relation(fields: [chargeId], references: [id])
+
+  @@unique([merchantId, key])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  chargeId  String
+  type      EventType
+  payload   Json
+
+  createdAt DateTime @default(now())
+
+  charge    Charge   @relation(fields: [chargeId], references: [id])
+}
+
+model WebhookDelivery {
+  id           String   @id @default(cuid())
+  chargeId     String
+  url          String
+  status       WebhookStatus
+  attempts     Int      @default(0)
+  lastError    String?
+  nextRetryAt  DateTime?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  charge       Charge   @relation(fields: [chargeId], references: [id])
+}
+
+enum ChargeStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  CANCELED
+}
+
+enum EventType {
+  CHARGE_CREATED
+  CHARGE_PROCESSING
+  CHARGE_PAID
+  CHARGE_FAILED
+  WEBHOOK_ENQUEUED
+  WEBHOOK_SENT
+  WEBHOOK_FAILED
+}
+
+enum WebhookStatus {
+  PENDING
+  SENT
+  FAILED
+}
