@@ -262,6 +262,113 @@ Testes cobrem:
 
 ---
 
+Documentação da API (Swagger)
+
+A API possui documentação interativa via Swagger.
+
+Acesse:
+
+http://localhost:3000/docs
+
+---
+
+Autenticação
+
+Clique em Authorize e informe:
+
+Bearer mk_test_123
+
+Valor definido em MERCHANT_API_KEY no .env
+
+---
+
+Criar uma cobrança
+
+POST /v1/charges
+
+Headers:
+
+Idempotency-Key: idem_001
+
+Body:
+
+{
+  "amount": 12990,
+  "currency": "BRL",
+  "customer": { "name": "Joao", "email": "joao@email.com" },
+  "payment_method": { "type": "card", "token": "tok_test_visa_1234" },
+  "metadata": { "orderId": "123" },
+  "webhook_url": "http://localhost:4000/webhook"
+}
+
+Resposta:
+
+{
+  "id": "ch_xxx",
+  "status": "PENDING",
+  "amount": 12990,
+  "currency": "BRL",
+  "created_at": "..."
+}
+
+---
+
+Consultar cobrança
+
+GET /v1/charges/{id}
+
+Retorna:
+
+* status atual
+* histórico de eventos
+* tentativas de webhook
+
+---
+
+Simular falha de pagamento
+
+Use token terminando em 0000:
+
+"token": "tok_test_0000"
+
+---
+
+Idempotência
+Caso	Resultado
+Mesmo Idempotency-Key + mesmo payload	Mesma cobrança
+Mesmo Idempotency-Key + payload diferente	409 Conflict
+📡 Reenviar webhook
+
+POST /v1/charges/{id}/webhooks/retry
+
+Cria nova tentativa de entrega.
+
+---
+
+Regras do simulador
+
+* Token terminando em 0000 → FAILED
+* Outros tokens → PAID
+* Webhook possui retry automático
+* Entrega at-least-once
+
+---
+
+Testes
+npm -w @pg/api test
+
+---
+
+O que este projeto prova
+
+* Design de sistemas distribuídos
+* Confiabilidade financeira
+* Consistência eventual
+* Tolerância a falhas
+* Backend orientado a eventos
+
+---
+
 # 📄 Licença
 
 MIT
